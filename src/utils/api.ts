@@ -1,4 +1,4 @@
-import {B30RetModel, BaseRetData, SlstRecords, UserRecords} from "./models.ts";
+import {B30RetModel, BaseRetData, BindData, SlstRecords, UserRecords} from "./models.ts";
 
 
 export const apiEndpoint = import.meta.env.VITE_API_ENDPOINT
@@ -61,7 +61,7 @@ export async function apiGetIsLogin(): Promise<BaseRetData> {
     return resp.json()
 }
 
-export async function apiGetIsBind(): Promise<BaseRetData> {
+export async function apiGetIsBind(): Promise<BindData> {
     const resp = await fetchAPI("arcweb/get_is_bind", "GET")
     return resp.json()
 }
@@ -101,5 +101,17 @@ export async function apiUploadSt3(st3File: File): Promise<BaseRetData> {
     const formdata = new FormData();
     formdata.append("st3", st3File)
     const resp = await fetchAPI("arcweb/upload_st3", "POST", formdata, undefined, null)
+    return resp.json()
+}
+
+
+export async function apiBindOauth(req_type: string, bind_data: string): Promise<BaseRetData> {
+    const resp = await fetchAPI(`arcweb/oauth_bind?req_type=${req_type}`, "POST", bind_data, undefined, "text/plain")
+    return resp.json()
+}
+
+
+export async function apiUnbindOauth(req_type: string): Promise<BaseRetData> {
+    const resp = await fetchAPI(`arcweb/oauth_unbind?req_type=${req_type}`, "POST")
     return resp.json()
 }

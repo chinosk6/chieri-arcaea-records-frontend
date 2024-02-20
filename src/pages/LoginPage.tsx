@@ -1,11 +1,14 @@
 import React, { useState } from "react";
-import {TextInput, Button, Group, Box, Text, PasswordInput} from '@mantine/core';
+import {TextInput, Button, Group, Box, Text, PasswordInput, Divider, ActionIcon} from '@mantine/core';
 import {useForm} from "@mantine/form";
 import {PageType} from "../utils/enums.ts";
 import {apiLogin} from "../utils/api.ts";
-import {showErrorMessage, showInfoMessage} from "../utils/utils.ts";
-import {marginTopBottom} from "../styles.ts";
+import {jumpToLink, showErrorMessage, showInfoMessage} from "../utils/utils.ts";
+import {iconMStyle, marginTopBottom, maxWidth} from "../styles.ts";
 import {recaptcha} from "./MainPage.tsx";
+import Icon from "@mdi/react";
+import {mdiGithub, mdiQqchat} from "@mdi/js";
+import {GithubOauthLink, QQOauthLink} from "../utils/presets.ts";
 
 
 export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -53,7 +56,7 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
                     <TextInput
                         withAsterisk
                         label="用户名"
-                        placeholder="输入用户名、邮箱或者绑定QQ号"
+                        placeholder="输入用户名"
                         {...form.getInputProps('userName')}
                     />
                     <PasswordInput
@@ -71,6 +74,23 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
                         </Group>
                     </Group>
                 </form>
+                <Divider my="md" label="第三方登录"/>
+                <Group justify="center">
+                    <ActionIcon variant="light" size="md"
+                                onClick={() => {
+                                    localStorage.removeItem("arc_token")
+                                    jumpToLink(QQOauthLink, "_self")
+                                }} >
+                        <Icon path={mdiQqchat} style={iconMStyle}/>
+                    </ActionIcon>
+                    <ActionIcon variant="light" size="md"
+                                onClick={() => {
+                                    localStorage.removeItem("arc_token")
+                                    jumpToLink(GithubOauthLink, "_self")
+                                }} >
+                        <Icon path={mdiGithub} style={iconMStyle}/>
+                    </ActionIcon>
+                </Group>
             </Box>
     );
 }

@@ -3,11 +3,12 @@ import {Box, Button, Checkbox, FileButton, Group, PasswordInput, Text, TextInput
 import {PageType} from "../utils/enums.ts";
 import {iconMStyle, marginTopBottom, maxWidth} from "../styles.ts";
 import Icon from "@mdi/react";
-import {mdiSync, mdiUpload} from "@mdi/js";
-import {apiBind, apiGetIsBind, apiGetIsLogin, apiUploadSt3} from "../utils/api.ts";
+import {mdiGithub, mdiQqchat, mdiSync, mdiUpload} from "@mdi/js";
+import {apiBind, apiGetIsBind, apiGetIsLogin, apiUnbindOauth, apiUploadSt3} from "../utils/api.ts";
 import {jumpToLink, showErrorMessage, showInfoMessage, showWarningMessage} from "../utils/utils.ts";
 import {useForm} from "@mantine/form";
 import {recaptcha} from "./MainPage.tsx";
+import {GithubOauthLink, QQOauthLink} from "../utils/presets.ts";
 
 
 export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -20,6 +21,8 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
     })
     const [file, setFile] = useState<File | null>(null)
     const [bindCode, setBindCode] = useState<string | null>(null)
+    const [bindGithub, setBindGithub] = useState<string | null>(null)
+    const [bindQQ, setBindQQ] = useState<string | null>(null)
     const [isBinding, setIsBinding] = useState(false)
     const resetRef = useRef<() => void>(null)
 
@@ -33,7 +36,9 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
         apiGetIsBind()
             .then((data) => {
                 if (data.success) {
-                    setBindCode(data.message)
+                    setBindCode(data.data!.arc_account)
+                    setBindGithub(data.data!.github_name)
+                    setBindQQ(data.data!.qq_name)
                 }
                 else {
                     setBindCode(null)
@@ -99,6 +104,20 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
             })
             .catch((e) => showErrorMessage(e.toString(), "上传出错"))
             .finally(() => setIsBinding(false))
+    }
+
+    const reqUnbind = (type: string) => {
+        apiUnbindOauth(type)
+            .then((result) => {
+                if (result.success) {
+                    showInfoMessage("", "已取消绑定")
+                }
+                else {
+                    showErrorMessage(result.message, "取消绑定失败")
+                }
+            })
+            .catch((e) => showErrorMessage(e.toString(), "取消绑定出错"))
+            .finally(() => checkIsLogin())
     }
 
     useEffect(() => {
@@ -173,6 +192,27 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
                         <Button fullWidth disabled={!file || isBinding} onClick={() => onclickUploadSt3()} leftSection={
                             <Icon path={mdiUpload} style={iconMStyle}></Icon>
                         }>上传 st3</Button>
+                    </Group>
+                </Box>
+
+                <Box>
+                    <Text>
+                        <h3>绑定第三方登录</h3>
+                    </Text>
+
+                    <Group maw={450}>
+                        {bindQQ ?
+                            <Button variant="outline" color="red" fullWidth onClick={() => reqUnbind("qq")}
+                                    leftSection={<Icon path={mdiQqchat} style={iconMStyle}></Icon>}>取消绑定 QQ: {bindQQ}</Button> :
+                            <Button fullWidth onClick={() => jumpToLink(QQOauthLink, "_self")}
+                                    leftSection={<Icon path={mdiQqchat} style={iconMStyle}></Icon>}>绑定 QQ</Button>
+                        }
+                        {bindGithub ?
+                            <Button variant="outline" color="red" fullWidth onClick={() => reqUnbind("github")} leftSection={
+                                <Icon path={mdiGithub} style={iconMStyle}></Icon>}>取消绑定 GitHub: {bindGithub}</Button> :
+                            <Button fullWidth onClick={() => jumpToLink(GithubOauthLink, "_self")} leftSection={
+                                <Icon path={mdiGithub} style={iconMStyle}></Icon>}>绑定 GitHub</Button>
+                        }
                     </Group>
                 </Box>
             </Box>

@@ -112,6 +112,14 @@ export interface SlstRecords extends BaseRetData{
     data: SlstItem[]
 }
 
+export interface BindData extends BaseRetData {
+    data?: {
+        "arc_account": string,
+        "qq_name": string | null,
+        "github_name": string | null
+    }
+}
+
 
 export interface Rect {
     width: number

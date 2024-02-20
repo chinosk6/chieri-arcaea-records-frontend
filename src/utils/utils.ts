@@ -44,10 +44,10 @@ export async function encodeImageToBase64(file: File): Promise<string> {
 }
 
 
-export function jumpToLink(url: string) {
+export function jumpToLink(url: string, target: string = "_blank") {
     const link = document.createElement('a');
     link.href = url;
-    link.target = "_blank";
+    link.target = target;
     document.body.appendChild(link)
     link.click();
     document.removeChild(link)
@@ -124,4 +124,8 @@ export function checkSongInB30List(song: B30RetModel, list: B30RetModel[]) {
 
 export function addThousandSeparators(num: number): string {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+}
+
+export function clearURLParameters() {
+    window.history.replaceState({}, document.title, window.location.pathname);
 }

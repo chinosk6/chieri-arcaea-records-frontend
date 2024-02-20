@@ -7,8 +7,8 @@ import {
 import LoginPage from "./LoginPage.tsx";
 import {PageType} from "../utils/enums.ts";
 import RegisterPage from "./RegisterPage.tsx";
-import {apiGetIsLogin, apiGetSlst} from "../utils/api.ts";
-import {showErrorMessage} from "../utils/utils.ts";
+import {apiBindOauth, apiGetIsLogin, apiGetSlst} from "../utils/api.ts";
+import {clearURLParameters, showErrorMessage, showInfoMessage} from "../utils/utils.ts";
 import ReCaptcha from "../utils/reCaptcha.ts";
 import {useDisclosure} from "@mantine/hooks";
 import RecordsPage from "./RecordsPage.tsx";
@@ -99,12 +99,57 @@ export default function MainPage() {
             .catch((e) => showErrorMessage(e.toString(), "错误"))
     }
 
-
-    useEffect(() => {
-        const token = localStorage.getItem("arc_token")
-        if (token) {
+    const onOauthData = (oauthData: string, new_ck: string | null, req_type: string) => {
+        if (new_ck) {
+            localStorage.setItem("arc_token", new_ck)
             refreshUserData()
         }
+        else {
+            const token = localStorage.getItem("arc_token")
+            if (!token) {
+                showErrorMessage("请先注册账号，然后绑定第三方登录。", "未注册账号")
+                return
+            }
+            apiGetIsLogin()
+                .then((result) => {
+                    if (result.success) {
+                        apiBindOauth(req_type, oauthData)
+                            .then((data) => {
+                                if (data.success) {
+                                    showInfoMessage("", "绑定成功", 5000)
+                                }
+                                else {
+                                    showErrorMessage(data.message, "绑定失败")
+                                }
+                            })
+                            .catch((e) => showErrorMessage(e.toString(), "绑定第三方账户错误"))
+                            .finally(() => changePageStat(PageType.AccountBind))
+                    }
+                    else {
+                        if (currentStat != PageType.Home) showErrorMessage(result.message, "获取登录态失败")
+                    }
+                })
+                .catch((e) => showErrorMessage(e.toString(), "错误"))
+        }
+    }
+
+    useEffect(() => {
+        const queryString = window.location.search
+        const params = new URLSearchParams(queryString)
+        const oauth_data = params.get('oauth_data')
+        const new_ck = params.get('new_ck')
+        const req_type = params.get('req_type')
+        if (oauth_data && req_type) {
+            onOauthData(oauth_data, new_ck, req_type)
+            clearURLParameters()
+        }
+        else {
+            const token = localStorage.getItem("arc_token")
+            if (token) {
+                refreshUserData()
+            }
+        }
+
         recaptcha.render()
     }, []);
 
