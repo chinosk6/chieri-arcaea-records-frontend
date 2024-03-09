@@ -75,6 +75,7 @@ export function difficultyIndexToStringId(index: number) {
         case 1: return "prs"
         case 2: return "ftr"
         case 3: return "byn"
+        case 4: return "etr"
         default: return "ftr"
     }
 }

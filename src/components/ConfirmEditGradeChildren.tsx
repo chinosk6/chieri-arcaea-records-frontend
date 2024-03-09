@@ -116,6 +116,11 @@ export default function ConfirmEditGradeChildren({grade, editList, onConfirm, sl
                                 label: `Beyond ${(currentSong?.rating_byn || 0) / 10}`,
                                 disabled: currentSong?.difficultly_byn == -1
                             },
+                            {
+                                value: "4",
+                                label: `Eternal ${(currentSong?.rating_etr || 0) / 10}`,
+                                disabled: currentSong?.difficultly_etr == -1
+                            },
                         ]}
                         disabled={Boolean(grade)}
                         {...form.getInputProps("difficulty")}

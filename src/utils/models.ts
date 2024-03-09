@@ -82,10 +82,12 @@ export interface SlstItem {
     "chart_designer_prs": string,
     "chart_designer_pst": string,
     "date": number,  // 10位
+    "difficultly_etr": number,  // -1表示不存在
     "difficultly_byn": number,  // -1表示不存在
     "difficultly_ftr": number,
     "difficultly_prs": number,
     "difficultly_pst": number,
+    "jacket_designer_etr": string,
     "jacket_designer_byn": string,
     "jacket_designer_ftr": string,
     "jacket_designer_prs": string,
@@ -97,6 +99,7 @@ export interface SlstItem {
     "notes_prs": number,
     "notes_pst": number,
     "pakset": string,
+    "rating_etr": number,  // -1表示不存在
     "rating_byn": number,  // -1表示不存在
     "rating_ftr": number,
     "rating_prs": number,

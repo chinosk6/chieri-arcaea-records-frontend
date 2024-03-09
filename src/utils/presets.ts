@@ -1,7 +1,7 @@
 import {B30RetModel} from "./models.ts";
 
 
-export const QQOauthLink = `https://graph.qq.com/oauth2.0/authorize?response_type=token&client_id=${102096390}&redirect_uri=https%3A%2F%2Fwww.chinosk6.cn%2Farcweb%2Foauth_callback%3Ftype%3Dqq&scope=get_user_info`
+export const QQOauthLink = `https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=${102096390}&redirect_uri=https%3A%2F%2Fwww.chinosk6.cn%2Farcweb%2Foauth_callback%3Ftype%3Dqq&scope=get_user_info`
 export const GithubOauthLink = `https://github.com/login/oauth/authorize?client_id=f824df6271e68153a637&redirect_uri=https%3A%2F%2Fwww.chinosk6.cn%2Farcweb%2Foauth_callback%3Ftype%3Dgithub&scope=user`
 
 
@@ -33,6 +33,7 @@ export function getDefaultGrade(userName: string, userId: number): B30RetModel {
 export const songDifficultyColor = [
     "cyan",
     "green.8",
-    "purple",
+    "grape.9",
     "red.8",
+    "grape.4"
 ]

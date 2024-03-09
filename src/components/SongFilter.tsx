@@ -43,6 +43,9 @@ export function SongFilter({onChange}: {onChange: (difficulty: number[], passSta
                     }, {
                         value: "3",
                         label: "Beyond",
+                    }, {
+                        value: "4",
+                        label: "Eternal",
                     }]}
                     placeholder="选择难度"
                     value={difficulty}
