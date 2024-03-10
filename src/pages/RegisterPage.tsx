@@ -6,6 +6,7 @@ import {apiRegister} from "../utils/api.ts";
 import {showErrorMessage, showInfoMessage} from "../utils/utils.ts";
 import {marginTopBottom} from "../styles.ts";
 import {recaptcha} from "./MainPage.tsx";
+import {getReCaptchaV2Token} from "../utils/getReCaptchaV2Token.tsx";
 
 
 export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -31,12 +32,15 @@ export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: Pag
         pageTypeSet(PageType.Login)
     }
 
-    const onClickRegister = (values: {userName: string, password: string, password2: string, email: string}) => {
+    const onClickRegister = (values: {userName: string, password: string, password2: string, email: string}, captchaVer = "v3") => {
         setIsReging(true)
 
-        recaptcha.getToken("arc_register")
+        const getReCaptchaToken = captchaVer == "v2" ? getReCaptchaV2Token : recaptcha.getToken
+
+        getReCaptchaToken("arc_register")
             .then((token) => {
-                apiRegister(values.userName, values.password, token)
+                setIsReging(true)
+                apiRegister(values.userName, values.password, token, captchaVer)
                     .then(
                         (result) => {
                             if (result.success) {
@@ -44,6 +48,11 @@ export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: Pag
                                 pageTypeSet(PageType.Login)
                             }
                             else {
+                                if (result.message == "useReCaptchaV2") {
+                                    if (captchaVer != "v2") {
+                                        return onClickRegister(values, "v2")
+                                    }
+                                }
                                 showErrorMessage(result.message, "注册失败")
                             }
                         })

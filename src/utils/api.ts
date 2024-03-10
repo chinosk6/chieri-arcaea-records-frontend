@@ -31,11 +31,11 @@ export async function fetchAPI(path: string, method: string, body?: any, headers
 }
 
 
-export async function apiRegister(userName: string, password: string, captchaToken: string): Promise<BaseRetData> {
+export async function apiRegister(userName: string, password: string, captchaToken: string, captchaVer: string): Promise<BaseRetData> {
     const resp = await fetchAPI("arcweb/register", "POST", {
         username: userName,
         password: password
-    }, {"captcha-token": captchaToken})
+    }, {"captcha-token": captchaToken, "captcha-ver": captchaVer})
     return resp.json()
 }
 
@@ -48,11 +48,11 @@ export async function apiChangePassword(password: string): Promise<BaseRetData> 
 }
 
 
-export async function apiLogin(userName: string, password: string, captchaToken: string): Promise<BaseRetData> {
+export async function apiLogin(userName: string, password: string, captchaToken: string, captchaVer: string): Promise<BaseRetData> {
     const resp = await fetchAPI("arcweb/login", "POST", {
         username: userName,
         password: password
-    }, {"captcha-token": captchaToken})
+    }, {"captcha-token": captchaToken, "captcha-ver": captchaVer})
     return resp.json()
 }
 
@@ -87,12 +87,12 @@ export function imageResURLFmt(sid: string, size: number = 200, difficulty: numb
 }
 
 
-export async function apiBind(userName: string, password: string, isUploadCookie: boolean, captchaToken: string): Promise<BaseRetData> {
+export async function apiBind(userName: string, password: string, isUploadCookie: boolean, captchaToken: string, captchaVer: string): Promise<BaseRetData> {
     const resp = await fetchAPI("arcweb/bind_arc_account", "POST", {
         username: userName,
         password: password,
         isUploadCookie: isUploadCookie
-    }, {"captcha-token": captchaToken})
+    }, {"captcha-token": captchaToken, "captcha-ver": captchaVer})
     return resp.json()
 }
 

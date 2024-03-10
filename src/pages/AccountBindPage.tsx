@@ -9,6 +9,7 @@ import {jumpToLink, showErrorMessage, showInfoMessage, showWarningMessage} from 
 import {useForm} from "@mantine/form";
 import {recaptcha} from "./MainPage.tsx";
 import {GithubOauthLink, QQOauthLink} from "../utils/presets.ts";
+import {getReCaptchaV2Token} from "../utils/getReCaptchaV2Token.tsx";
 
 
 export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -64,11 +65,15 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
             .catch((e) => showErrorMessage(e.toString(), "错误"))
     }
 
-    const onclickBindAccount = (value: {userName: string, password: string, isUploadCookie: boolean}) => {
+    const onclickBindAccount = (value: {userName: string, password: string, isUploadCookie: boolean}, captchaVer = "v3") => {
         setIsBinding(true)
-        recaptcha.getToken("arc_bind")
+
+        const getReCaptchaToken = captchaVer == "v2" ? getReCaptchaV2Token : recaptcha.getToken
+
+        getReCaptchaToken("arc_bind")
             .then((token) => {
-                apiBind(value.userName, value.password, value.isUploadCookie, token)
+                setIsBinding(true)
+                apiBind(value.userName, value.password, value.isUploadCookie, token, captchaVer)
                     .then((result) => {
                         if (result.success) {
                             showInfoMessage(result.message, "绑定成功")
@@ -77,6 +82,11 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
                             checkBindAccount()
                         }
                         else {
+                            if (result.message == "useReCaptchaV2") {
+                                if (captchaVer != "v2") {
+                                    return onclickBindAccount(value, "v2")
+                                }
+                            }
                             showErrorMessage(result.message, "绑定失败")
                         }
                     })

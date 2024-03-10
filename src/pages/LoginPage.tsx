@@ -9,6 +9,7 @@ import {recaptcha} from "./MainPage.tsx";
 import Icon from "@mdi/react";
 import {mdiGithub, mdiQqchat} from "@mdi/js";
 import {GithubOauthLink, QQOauthLink} from "../utils/presets.ts";
+import {getReCaptchaV2Token} from "../utils/getReCaptchaV2Token.tsx";
 
 
 export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -24,12 +25,14 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
         pageTypeSet(PageType.Register)
     }
 
-    const onClickLogin = (values: {userName: string, password: string}) => {
+    const onClickLogin = (values: {userName: string, password: string}, captchaVer = "v3") => {
         setIsLoggingIn(true)
+        const getReCaptchaToken = captchaVer == "v2" ? getReCaptchaV2Token : recaptcha.getToken
 
-        recaptcha.getToken("arc_login")
+        getReCaptchaToken("arc_login")
             .then((token) => {
-                apiLogin(values.userName, values.password, token)
+                setIsLoggingIn(true)
+                apiLogin(values.userName, values.password, token, captchaVer)
                     .then((result) => {
                         if (result.success) {
                             localStorage.setItem("arc_token", result.message)
@@ -37,6 +40,11 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
                             pageTypeSet(PageType.Records)
                         }
                         else {
+                            if (result.message == "useReCaptchaV2") {
+                                if (captchaVer != "v2") {
+                                    return onClickLogin(values, "v2")
+                                }
+                            }
                             showErrorMessage(result.message, "登录失败")
                         }
                     })
@@ -50,47 +58,48 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
     }
 
     return (
-            <Box maw={340} mx="auto" style={marginTopBottom}>
-                <Text fw={700} size="xl">登录</Text>
-                <form onSubmit={form.onSubmit((values) => onClickLogin(values))}>
-                    <TextInput
-                        withAsterisk
-                        label="用户名"
-                        placeholder="输入用户名"
-                        {...form.getInputProps('userName')}
-                    />
-                    <PasswordInput
-                        withAsterisk
-                        label="密码"
-                        placeholder="密码"
-                        {...form.getInputProps('password')}
-                    />
+        <Box maw={340} mx="auto" style={marginTopBottom}>
+            <Text fw={700} size="xl">登录</Text>
 
-                    <Group mt="md" justify="space-between">
-                        <Button>忘记密码?</Button>
-                        <Group justify="flex-end">
-                            <Button onClick={onClickRegister}>注册</Button>
-                            <Button type="submit" disabled={isLoggingIn}>登录</Button>
-                        </Group>
+            <form onSubmit={form.onSubmit((values) => onClickLogin(values))}>
+                <TextInput
+                    withAsterisk
+                    label="用户名"
+                    placeholder="输入用户名"
+                    {...form.getInputProps('userName')}
+                />
+                <PasswordInput
+                    withAsterisk
+                    label="密码"
+                    placeholder="密码"
+                    {...form.getInputProps('password')}
+                />
+
+                <Group mt="md" justify="space-between">
+                    <Button>忘记密码?</Button>
+                    <Group justify="flex-end">
+                        <Button onClick={onClickRegister}>注册</Button>
+                        <Button type="submit" disabled={isLoggingIn}>登录</Button>
                     </Group>
-                </form>
-                <Divider my="md" label="第三方登录"/>
-                <Group justify="center">
-                    <ActionIcon variant="light" size="md"
-                                onClick={() => {
-                                    localStorage.removeItem("arc_token")
-                                    jumpToLink(QQOauthLink, "_self")
-                                }} >
-                        <Icon path={mdiQqchat} style={iconMStyle}/>
-                    </ActionIcon>
-                    <ActionIcon variant="light" size="md"
-                                onClick={() => {
-                                    localStorage.removeItem("arc_token")
-                                    jumpToLink(GithubOauthLink, "_self")
-                                }} >
-                        <Icon path={mdiGithub} style={iconMStyle}/>
-                    </ActionIcon>
                 </Group>
-            </Box>
+            </form>
+            <Divider my="md" label="第三方登录"/>
+            <Group justify="center">
+            <ActionIcon variant="light" size="md"
+                            onClick={() => {
+                                localStorage.removeItem("arc_token")
+                                jumpToLink(QQOauthLink, "_self")
+                            }}>
+                    <Icon path={mdiQqchat} style={iconMStyle}/>
+                </ActionIcon>
+                <ActionIcon variant="light" size="md"
+                            onClick={() => {
+                                localStorage.removeItem("arc_token")
+                                jumpToLink(GithubOauthLink, "_self")
+                            }}>
+                    <Icon path={mdiGithub} style={iconMStyle}/>
+                </ActionIcon>
+            </Group>
+        </Box>
     );
 }
