@@ -6,10 +6,12 @@ import {mdiAccount, mdiDatabase, mdiExitToApp, mdiHome, mdiLockReset} from "@mdi
 import React, {useState} from "react";
 import {modals} from "@mantine/modals";
 import {PasswordChange} from "./subs/PasswordChange.tsx";
+import {useTranslation} from "react-i18next";
 
 
 export function PageNavbar({currentStat, changePageStat}: {currentStat: PageType, changePageStat: (p: PageType) => any}) {
     const [changingPasswd, setChangingPasswd] = useState(false)
+    const {t} = useTranslation()
 
     const onExitLogin = () => {
         localStorage.removeItem("arc_token")
@@ -22,16 +24,16 @@ export function PageNavbar({currentStat, changePageStat}: {currentStat: PageType
                   onChange={(e) => {if (e) changePageStat(e as PageType)}}>
                 <Tabs.List style={maxWidth}>
                     <Tabs.Tab value={PageType.Home} leftSection={<Icon path={mdiHome} style={iconMStyle}/>}>
-                        主页
+                        {t("homePage")}
                     </Tabs.Tab>
                     {/*<Tabs.Tab value={PageType.Login} leftSection={<Icon path={mdiLogin} style={iconMStyle}/>}>*/}
                     {/*    登录*/}
                     {/*</Tabs.Tab>*/}
                     <Tabs.Tab value={PageType.AccountBind} leftSection={<Icon path={mdiAccount} style={iconMStyle}/> }>
-                        账号管理
+                        {t("accountManage")}
                     </Tabs.Tab>
                     <Tabs.Tab value={PageType.Records} leftSection={<Icon path={mdiDatabase} style={iconMStyle}/> }>
-                        成绩管理
+                        {t("scoreM")}
                     </Tabs.Tab>
                 </Tabs.List>
             </Tabs>
@@ -40,16 +42,16 @@ export function PageNavbar({currentStat, changePageStat}: {currentStat: PageType
                     <Icon path={mdiLockReset} style={iconMStyle}></Icon>
                 } onClick={() => {
                     modals.open({
-                        title: '修改密码',
+                        title: t("changePasswd"),
                         centered: true,
                         children: (
                             <PasswordChange setChangingPasswd={setChangingPasswd}
                                             changingPasswd={changingPasswd} pageTypeSet={changePageStat}/>
                         ),
                     })
-                }}>修改密码</Button>
+                }}>{t("changePasswd")}</Button>
                 <Button variant="outline" color="red" fullWidth justify="start" onClick={() => onExitLogin()}
-                        leftSection={<Icon path={mdiExitToApp} style={iconMStyle}/>}>退出登录</Button>
+                        leftSection={<Icon path={mdiExitToApp} style={iconMStyle}/>}>{t("logout")}</Button>
             </Flex>
 
         </>

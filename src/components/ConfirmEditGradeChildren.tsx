@@ -14,6 +14,7 @@ import {
 import {maxWidth} from "../styles.ts";
 import {modals} from "@mantine/modals";
 import {DateTimePicker} from "@mantine/dates";
+import {useTranslation} from "react-i18next";
 
 export default function ConfirmEditGradeChildren({grade, editList, onConfirm, slst, meData}: {grade?: B30RetModel, editList?: B30RetModel[],
     onConfirm?: (newEditedList: B30RetModel[]) => any, slst: SlstItem[], meData: MeRet}) {
@@ -24,6 +25,7 @@ export default function ConfirmEditGradeChildren({grade, editList, onConfirm, sl
     const [currentDifficulty, setCurrentDifficulty] = useState(grade?.difficulty || 2)
     const [currentSong, setCurrentSong] = useState<SlstItem | null>(null)
     const refreshScoreRef = useRef(false)
+    const {t} = useTranslation()
 
     useEffect(() => {
         for(const i of slst) {
@@ -76,7 +78,7 @@ export default function ConfirmEditGradeChildren({grade, editList, onConfirm, sl
                 <Image src={imageResURLFmt(currentSid, 150, currentDifficulty)} w={rem(140)}/>
                 <Group>
                     <Select
-                        label="曲目选择"
+                        label={t("songSelect")}
                         placeholder="Select Song"
                         data={slst.map(item => ({
                             value: item.sid,
@@ -93,7 +95,7 @@ export default function ConfirmEditGradeChildren({grade, editList, onConfirm, sl
                         }}
                     />
                     <Select
-                        label="难度选择"
+                        label={t("difficultySelect")}
                         placeholder="Select Difficulty"
                         data={[
                             {
@@ -166,7 +168,7 @@ export default function ConfirmEditGradeChildren({grade, editList, onConfirm, sl
                                      refreshScoreRef.current = true
                                  }}/>
                 </Group>
-                <DateTimePicker style={maxWidth} valueFormat="YYYY.MM.DD HH:mm:ss" label="游玩时间" placeholder="Pick date and time"
+                <DateTimePicker style={maxWidth} valueFormat="YYYY.MM.DD HH:mm:ss" label={t("timePlayed")} placeholder="Pick date and time"
                                 excludeDate={(date) => date > new Date()}
                                 value={new Date(form.values.time_played)}
                                 onChange={(value) => {
@@ -177,8 +179,8 @@ export default function ConfirmEditGradeChildren({grade, editList, onConfirm, sl
             </Group>
             <form onSubmit={form.onSubmit((v) => onClickSubmit(v))} style={maxWidth}>
                 <Group justify="flex-end">
-                    <Button type="submit">确定</Button>
-                    <Button color="red" onClick={() => closeModals()}>取消</Button>
+                    <Button type="submit">{t("submit")}</Button>
+                    <Button color="red" onClick={() => closeModals()}>{t("cancel")}</Button>
                 </Group>
             </form>
 </Group>

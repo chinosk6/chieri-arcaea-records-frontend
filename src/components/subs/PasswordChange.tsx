@@ -4,6 +4,7 @@ import {showErrorMessage, showInfoMessage} from "../../utils/utils.ts";
 import {modals} from "@mantine/modals";
 import {Button, PasswordInput} from "@mantine/core";
 import {apiChangePassword} from "../../utils/api.ts";
+import {useTranslation} from "react-i18next";
 
 
 interface PasswordChangeType {
@@ -20,10 +21,11 @@ export function PasswordChange({setChangingPasswd, pageTypeSet, changingPasswd}:
             password2: '',
         },
         validate: {
-            password: (value, others) => (others.password2 === value ? null : "两次输入密码不一致"),
-            password2: (value, others) => (others.password === value ? null : "两次输入密码不一致")
+            password: (value, others) => (others.password2 === value ? null : t("pwdInconsistent")),
+            password2: (value, others) => (others.password === value ? null : t("pwdInconsistent"))
         }
     });
+    const {t} = useTranslation()
 
     return (
         <form onSubmit={passwordChangeForm.onSubmit((values) => {
@@ -31,22 +33,22 @@ export function PasswordChange({setChangingPasswd, pageTypeSet, changingPasswd}:
             apiChangePassword(values.password)
                 .then((result) => {
                     if (result.success) {
-                        showInfoMessage("", "密码修改成功", 6000)
+                        showInfoMessage("", t("pwdChangeSuccess"), 6000)
                         modals.closeAll()
                         localStorage.removeItem("arc_token")
                         pageTypeSet(PageType.Login)
                     } else {
-                        showErrorMessage(result.message, "密码修改失败")
+                        showErrorMessage(result.message, t("pwdChangeFailed"))
                     }
                 })
-                .catch((e) => showInfoMessage(e.toString(), "密码修改出错"))
+                .catch((e) => showInfoMessage(e.toString(), t("pwdChangeError")))
                 .finally(() => setChangingPasswd(false))
         })}>
-            <PasswordInput label="新密码" placeholder="新密码" {...passwordChangeForm.getInputProps('password')}/>
-            <PasswordInput label="确认新密码"
-                           placeholder="确认新密码" {...passwordChangeForm.getInputProps('password2')}/>
+            <PasswordInput label={t("newPwd")} placeholder={t("newPwd")} {...passwordChangeForm.getInputProps('password')}/>
+            <PasswordInput label={t("confirmNewPwd")}
+                           placeholder={t("confirmNewPwd")} {...passwordChangeForm.getInputProps('password2')}/>
             <Button fullWidth mt="md" loading={changingPasswd} type="submit">
-                修改
+                {t("change")}
             </Button>
         </form>
     )

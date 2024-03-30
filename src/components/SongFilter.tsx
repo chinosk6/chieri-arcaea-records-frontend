@@ -1,5 +1,6 @@
 import {Grid, MultiSelect, RangeSlider, Text} from "@mantine/core";
 import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 
 
 export function SongFilter({onChange}: {onChange: (difficulty: number[], passStat: string[], ratingRange: [number, number], gradeType: string[]) => any}) {
@@ -9,6 +10,7 @@ export function SongFilter({onChange}: {onChange: (difficulty: number[], passSta
     const [rating, setRating] = useState<[number, number]>([1, 14])
     const [endRatingRange, setEndRatingRange] = useState<[number, number]>([1, 14])
     const [width, setWidth] = useState(window.innerWidth)
+    const {t} = useTranslation()
 
     useEffect(() => {
         const handleResize = () => {
@@ -47,7 +49,7 @@ export function SongFilter({onChange}: {onChange: (difficulty: number[], passSta
                         value: "4",
                         label: "Eternal",
                     }]}
-                    placeholder="选择难度"
+                    placeholder={t("difficultySelect")}
                     value={difficulty}
                     onChange={(value) => setDifficulty(value)}
                     comboboxProps={{ transitionProps: { transition: 'fade', duration: 100, timingFunction: 'ease' } }}
@@ -66,7 +68,7 @@ export function SongFilter({onChange}: {onChange: (difficulty: number[], passSta
                         value: "all",
                         label: "All",
                     }]}
-                    placeholder="通关状态"
+                    placeholder={t("songStatus")}
                     value={passStat}
                     onChange={(value) => setPassStat(value)}
                     comboboxProps={{ transitionProps: { transition: 'fade', duration: 100, timingFunction: 'ease' } }}
@@ -77,12 +79,12 @@ export function SongFilter({onChange}: {onChange: (difficulty: number[], passSta
                 <MultiSelect
                     data={[{
                         value: "orig",
-                        label: "未修改",
+                        label: t("original"),
                     }, {
                         value: "edited",
-                        label: "手动编辑",
+                        label: t("edited"),
                     }]}
-                    placeholder="成绩类型"
+                    placeholder={t("gradesType")}
                     value={gradeType}
                     onChange={(value) => setGradeType(value)}
                     comboboxProps={{ transitionProps: { transition: 'fade', duration: 100, timingFunction: 'ease' } }}
@@ -90,7 +92,7 @@ export function SongFilter({onChange}: {onChange: (difficulty: number[], passSta
             </Grid.Col>
 
             <Grid.Col span={12} mb="md">
-                <Text fz="xs" c="dimmed" mb={3}>筛选谱面定数</Text>
+                <Text fz="xs" c="dimmed" mb={3}>{t("songRatingRange")}</Text>
                 <RangeSlider
                     min={1}
                     max={14}

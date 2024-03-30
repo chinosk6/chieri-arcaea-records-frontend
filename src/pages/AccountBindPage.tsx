@@ -10,6 +10,7 @@ import {useForm} from "@mantine/form";
 import {recaptcha} from "./MainPage.tsx";
 import {GithubOauthLink, QQOauthLink} from "../utils/presets.ts";
 import {getReCaptchaV2Token} from "../utils/getReCaptchaV2Token.tsx";
+import {useTranslation} from "react-i18next";
 
 
 export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -26,7 +27,16 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
     const [bindQQ, setBindQQ] = useState<string | null>(null)
     const [isBinding, setIsBinding] = useState(false)
     const resetRef = useRef<() => void>(null)
+    const {t, i18n} = useTranslation()
 
+    const checkLangAndGoToDocs = () => {
+        let url: string
+        switch (i18n.language) {
+            case "en": url = "https://chieri.docs.chinosk6.cn/discord/arcaea.html#sync-local-st3-database"; break;
+            default: url = "https://chieri.docs.chinosk6.cn/group/arcaea.html#%E5%90%8C%E6%AD%A5%E6%9C%AC%E5%9C%B0-st3-%E6%95%B0%E6%8D%AE%E5%BA%93";
+        }
+        jumpToLink(url)
+    }
 
     const clearFile = () => {
         setFile(null)
@@ -47,7 +57,7 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
             })
             .catch((e) => {
                 setBindCode(null)
-                showErrorMessage(e.toString(), "获取绑定数据失败")
+                showErrorMessage(e.toString(), t("getBindFailed"))
             })
     }
 
@@ -56,13 +66,13 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
             .then((result) => {
                 if (!result.success) {
                     pageTypeSet(PageType.Login)
-                    showWarningMessage("请先登录", "未登录")
+                    showWarningMessage(t("pleaseLogin"), t("notLogin"))
                 }
                 else {
                     checkBindAccount()
                 }
             })
-            .catch((e) => showErrorMessage(e.toString(), "错误"))
+            .catch((e) => showErrorMessage(e.toString(), t("error")))
     }
 
     const onclickBindAccount = (value: {userName: string, password: string, isUploadCookie: boolean}, captchaVer = "v3") => {
@@ -76,7 +86,7 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
                 apiBind(value.userName, value.password, value.isUploadCookie, token, captchaVer)
                     .then((result) => {
                         if (result.success) {
-                            showInfoMessage(result.message, "绑定成功")
+                            showInfoMessage(result.message, t("bindSuccess"))
                             localStorage.setItem("bind_account", value.userName)
                             localStorage.setItem("bind_password", value.password)
                             checkBindAccount()
@@ -87,10 +97,10 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
                                     return onclickBindAccount(value, "v2")
                                 }
                             }
-                            showErrorMessage(result.message, "绑定失败")
+                            showErrorMessage(result.message, t("bindFailed"))
                         }
                     })
-                    .catch((e) => showErrorMessage(e.toString(), "绑定账号出错"))
+                    .catch((e) => showErrorMessage(e.toString(), t("bindErr")))
                     .finally(() => setIsBinding(false))
 
             })
@@ -106,13 +116,13 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
         apiUploadSt3(file)
             .then((result) => {
                 if (result.success) {
-                    showInfoMessage("", "上传成功", 5000)
+                    showInfoMessage("", t("uploadSuccess"), 5000)
                 }
                 else {
-                    showErrorMessage(result.message, "上传失败")
+                    showErrorMessage(result.message, t("uploadFailed"))
                 }
             })
-            .catch((e) => showErrorMessage(e.toString(), "上传出错"))
+            .catch((e) => showErrorMessage(e.toString(), t("uploadErr")))
             .finally(() => setIsBinding(false))
     }
 
@@ -120,13 +130,13 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
         apiUnbindOauth(type)
             .then((result) => {
                 if (result.success) {
-                    showInfoMessage("", "已取消绑定")
+                    showInfoMessage("", t("cancelBind"))
                 }
                 else {
-                    showErrorMessage(result.message, "取消绑定失败")
+                    showErrorMessage(result.message, t("cancelBindFailed"))
                 }
             })
-            .catch((e) => showErrorMessage(e.toString(), "取消绑定出错"))
+            .catch((e) => showErrorMessage(e.toString(), t("cancelBindErr")))
             .finally(() => checkIsLogin())
     }
 
@@ -138,14 +148,14 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
             <Box style={marginTopBottom}>
                 <Group>
                     <Text>
-                        <h1>账号绑定/数据更新</h1>
-                        <Text>推荐使用 APP/XP模块 绑定</Text>
-                        <h2>从 APP/XP模块 绑定</h2>
-                        <Text>见: <Text span c="blue" onClick={() => jumpToLink("https://chieri.docs.chinosk6.cn/group/arcaea.html#%E5%90%8C%E6%AD%A5%E6%9C%AC%E5%9C%B0-st3-%E6%95%B0%E6%8D%AE%E5%BA%93")}>文档</Text></Text>
-                        <h2>在本页面绑定</h2>
-                        <Text fw={700}>账号/密码仅用作数据同步，服务器不会保存您的密码。</Text>
-                        {form.values.isUploadCookie && <Text fw={700}>当服务器 Cookie 过期后，到本页再次绑定也可以更新 Cookie。</Text>}
-                        {bindCode && <Text fw={700} c="red">您已绑定到: {bindCode}</Text>}
+                        <h1>{t("bindT1")}</h1>
+                        <Text>{t("bindT2")}</Text>
+                        <h2>{t("bindT3")}</h2>
+                        <Text>{t("see")}: <Text span c="blue" onClick={() => checkLangAndGoToDocs()}>{t("docs")}</Text></Text>
+                        <h2>{t("bindT4")}</h2>
+                        <Text fw={700}>{t("bindT5")}</Text>
+                        {form.values.isUploadCookie && <Text fw={700}>{t("bindT6")}</Text>}
+                        {bindCode && <Text fw={700} c="red">{t("bindT7")}: {bindCode}</Text>}
                     </Text>
                 </Group>
 
@@ -154,22 +164,22 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
                         <Box maw={450}>
                             <TextInput
                                 withAsterisk
-                                label="Arcaea 账号"
-                                placeholder="输入用于登录的 Arcaea 账号"
+                                label={t("ArcaeaAccount")}
+                                placeholder={t("inputLoginArcaeaAccount")}
                                 {...form.getInputProps('userName')}
                             />
                             <PasswordInput
                                 withAsterisk
-                                label="密码"
-                                placeholder="Arcaea 登录密码"
+                                label={t("pwd")}
+                                placeholder={t("arcaeaLoginPwd")}
                                 {...form.getInputProps('password')}
                             />
 
                             <Group justify="space-between" style={marginTopBottom}>
-                                <Checkbox label="上传 Cookie 用于 /a 指令" defaultChecked {...form.getInputProps("isUploadCookie")}/>
+                                <Checkbox label={t("uploadCookieForA")} defaultChecked {...form.getInputProps("isUploadCookie")}/>
                                 <Button type="submit" disabled={isBinding} leftSection={
                                     <Icon path={mdiSync} style={iconMStyle}></Icon>
-                                }>绑定</Button>
+                                }>{t("bind")}</Button>
 
                             </Group>
 
@@ -179,7 +189,7 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
 
                 <Box>
                     <Text>
-                        <h3>上传数据</h3>
+                        <h3>{t("uploadData")}</h3>
                     </Text>
 
                     <Group maw={450}>
@@ -201,27 +211,27 @@ export default function AccountBindPage({pageTypeSet}: {pageTypeSet: (pageType: 
 
                         <Button fullWidth disabled={!file || isBinding} onClick={() => onclickUploadSt3()} leftSection={
                             <Icon path={mdiUpload} style={iconMStyle}></Icon>
-                        }>上传 st3</Button>
+                        }>{t("upload")} st3</Button>
                     </Group>
                 </Box>
 
                 <Box>
                     <Text>
-                        <h3>绑定第三方登录</h3>
+                        <h3>{t("bindThirdPartLogin")}</h3>
                     </Text>
 
                     <Group maw={450}>
                         {bindQQ ?
                             <Button variant="outline" color="red" fullWidth onClick={() => reqUnbind("qq")}
-                                    leftSection={<Icon path={mdiQqchat} style={iconMStyle}></Icon>}>取消绑定 QQ: {bindQQ}</Button> :
+                                    leftSection={<Icon path={mdiQqchat} style={iconMStyle}></Icon>}>{t("unbind")} QQ: {bindQQ}</Button> :
                             <Button fullWidth onClick={() => jumpToLink(QQOauthLink, "_self")}
-                                    leftSection={<Icon path={mdiQqchat} style={iconMStyle}></Icon>}>绑定 QQ</Button>
+                                    leftSection={<Icon path={mdiQqchat} style={iconMStyle}></Icon>}>{t("bind")} QQ</Button>
                         }
                         {bindGithub ?
                             <Button variant="outline" color="red" fullWidth onClick={() => reqUnbind("github")} leftSection={
-                                <Icon path={mdiGithub} style={iconMStyle}></Icon>}>取消绑定 GitHub: {bindGithub}</Button> :
+                                <Icon path={mdiGithub} style={iconMStyle}></Icon>}>{t("unbind")} GitHub: {bindGithub}</Button> :
                             <Button fullWidth onClick={() => jumpToLink(GithubOauthLink, "_self")} leftSection={
-                                <Icon path={mdiGithub} style={iconMStyle}></Icon>}>绑定 GitHub</Button>
+                                <Icon path={mdiGithub} style={iconMStyle}></Icon>}>{t("bind")} GitHub</Button>
                         }
                     </Group>
                 </Box>

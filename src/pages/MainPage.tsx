@@ -17,6 +17,7 @@ import {SlstItem} from "../utils/models.ts";
 import AccountBindPage from "./AccountBindPage.tsx";
 import {PageNavbar} from "../components/PageNavbar.tsx";
 import {PageHeader} from "../components/PageHeader.tsx";
+import {useTranslation} from "react-i18next";
 
 
 export const recaptcha = new ReCaptcha()
@@ -28,6 +29,7 @@ export default function MainPage() {
     const [opened, { toggle }] = useDisclosure();
     // const [height, setHeight] = useState(window.innerHeight)
     const [songs, setSongs] = useState<SlstItem[] | null>(null)
+    const {t} = useTranslation()
 
 
     const changePageStat = (pageType: PageType) => {
@@ -71,12 +73,12 @@ export default function MainPage() {
                         resolve(1)
                     }
                     else {
-                        showErrorMessage(result.message, "获取曲目列表失败")
+                        showErrorMessage(result.message, t("getSlstFailed"))
                         reject(result.message)
                     }
                 })
                 .catch((e) => {
-                    showErrorMessage(e.toString(), "获取曲目列表出错")
+                    showErrorMessage(e.toString(), t("getSlstErr"))
                     reject(e.toString())
                 })
         })
@@ -93,10 +95,10 @@ export default function MainPage() {
                     }
                 }
                 else {
-                    if (currentStat != PageType.Home) showErrorMessage(result.message, "获取登录态失败")
+                    if (currentStat != PageType.Home) showErrorMessage(result.message, t("getLoginStatFailed"))
                 }
             })
-            .catch((e) => showErrorMessage(e.toString(), "错误"))
+            .catch((e) => showErrorMessage(e.toString(), t("error")))
     }
 
     const onOauthData = (oauthData: string, new_ck: string | null, req_type: string) => {
@@ -107,7 +109,7 @@ export default function MainPage() {
         else {
             const token = localStorage.getItem("arc_token")
             if (!token) {
-                showErrorMessage("请先注册账号，然后绑定第三方登录。", "未注册账号")
+                showErrorMessage(t("regFirst"), t("notReg"))
                 return
             }
             apiGetIsLogin()
@@ -116,20 +118,20 @@ export default function MainPage() {
                         apiBindOauth(req_type, oauthData)
                             .then((data) => {
                                 if (data.success) {
-                                    showInfoMessage("", "绑定成功", 5000)
+                                    showInfoMessage("", t("bindSuccess"), 5000)
                                 }
                                 else {
-                                    showErrorMessage(data.message, "绑定失败")
+                                    showErrorMessage(data.message, t("bindFailed"))
                                 }
                             })
-                            .catch((e) => showErrorMessage(e.toString(), "绑定第三方账户错误"))
+                            .catch((e) => showErrorMessage(e.toString(), t("bindThirdPartErr")))
                             .finally(() => changePageStat(PageType.AccountBind))
                     }
                     else {
-                        if (currentStat != PageType.Home) showErrorMessage(result.message, "获取登录态失败")
+                        if (currentStat != PageType.Home) showErrorMessage(result.message, t("getLoginStatFailed"))
                     }
                 })
-                .catch((e) => showErrorMessage(e.toString(), "错误"))
+                .catch((e) => showErrorMessage(e.toString(), t("error")))
         }
     }
 

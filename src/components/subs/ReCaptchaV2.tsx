@@ -23,7 +23,7 @@ export default function ReCaptchaV2({action, onResult}: {action: string, onResul
                 // @ts-ignore
                 action: action,
                 callback: (response: string) => {
-                    showInfoMessage("验证完成", "人机验证", 3000)
+                    showInfoMessage("Verification success", "ReCaptcha", 3000)
                     onResult(response)
                 },
                 'expired-callback': () => reRender(),

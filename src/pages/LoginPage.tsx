@@ -10,6 +10,7 @@ import Icon from "@mdi/react";
 import {mdiGithub, mdiQqchat} from "@mdi/js";
 import {GithubOauthLink, QQOauthLink} from "../utils/presets.ts";
 import {getReCaptchaV2Token} from "../utils/getReCaptchaV2Token.tsx";
+import {useTranslation} from "react-i18next";
 
 
 export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -20,6 +21,7 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
         }
     });
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const {t} = useTranslation()
 
     const onClickRegister = () => {
         pageTypeSet(PageType.Register)
@@ -36,7 +38,7 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
                     .then((result) => {
                         if (result.success) {
                             localStorage.setItem("arc_token", result.message)
-                            showInfoMessage("", "登录成功", 3000)
+                            showInfoMessage("", t("loginSuccess"), 3000)
                             pageTypeSet(PageType.Records)
                         }
                         else {
@@ -45,10 +47,10 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
                                     return onClickLogin(values, "v2")
                                 }
                             }
-                            showErrorMessage(result.message, "登录失败")
+                            showErrorMessage(result.message, t("loginFailed"))
                         }
                     })
-                    .catch((e) => showErrorMessage(e.toString(), "错误"))
+                    .catch((e) => showErrorMessage(e.toString(), t("error")))
                     .finally(() => setIsLoggingIn(false))
             })
             .catch((e) => {
@@ -59,31 +61,31 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
 
     return (
         <Box maw={340} mx="auto" style={marginTopBottom}>
-            <Text fw={700} size="xl">登录</Text>
+            <Text fw={700} size="xl">{t("login")}</Text>
 
             <form onSubmit={form.onSubmit((values) => onClickLogin(values))}>
                 <TextInput
                     withAsterisk
-                    label="用户名"
-                    placeholder="输入用户名"
+                    label={t("userName")}
+                    placeholder={t("inputUserName")}
                     {...form.getInputProps('userName')}
                 />
                 <PasswordInput
                     withAsterisk
-                    label="密码"
-                    placeholder="密码"
+                    label={t("pwd")}
+                    placeholder={t("pwd")}
                     {...form.getInputProps('password')}
                 />
 
                 <Group mt="md" justify="space-between">
-                    <Button>忘记密码?</Button>
+                    <Button>{t("forgotPwd?")}</Button>
                     <Group justify="flex-end">
-                        <Button onClick={onClickRegister}>注册</Button>
-                        <Button type="submit" disabled={isLoggingIn}>登录</Button>
+                        <Button onClick={onClickRegister}>{t("register")}</Button>
+                        <Button type="submit" disabled={isLoggingIn}>{t("login")}</Button>
                     </Group>
                 </Group>
             </form>
-            <Divider my="md" label="第三方登录"/>
+            <Divider my="md" label={t("thirdPartLogin")}/>
             <Group justify="center">
             <ActionIcon variant="light" size="md"
                             onClick={() => {

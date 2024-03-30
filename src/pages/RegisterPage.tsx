@@ -7,9 +7,11 @@ import {showErrorMessage, showInfoMessage} from "../utils/utils.ts";
 import {marginTopBottom} from "../styles.ts";
 import {recaptcha} from "./MainPage.tsx";
 import {getReCaptchaV2Token} from "../utils/getReCaptchaV2Token.tsx";
+import {useTranslation} from "react-i18next";
 
 
 export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
+    const {t} = useTranslation()
     const form = useForm({
         initialValues: {
             userName: '',
@@ -19,14 +21,14 @@ export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: Pag
         },
 
         validate: {
-            userName: (value) => (/^\d+$/.test(value) ? "用户名不能是纯数字" : null),
-            email: (value) => (/^\S+@\S+$/.test(value) ? null : "不合法的邮箱"),
-            password: (value, others) => (others.password2 === value ? null : "两次输入密码不一致"),
-            password2: (value, others) => (others.password === value ? null : "两次输入密码不一致")
+            userName: (value) => (/^\d+$/.test(value) ? t("userNameCantPureNumber") : null),
+            email: (value) => (/^\S+@\S+$/.test(value) ? null : t("invalidEmail")),
+            password: (value, others) => (others.password2 === value ? null : t("pwdInconsistent")),
+            password2: (value, others) => (others.password === value ? null : t("pwdInconsistent"))
         },
     });
 
-    const [isReging, setIsReging] = useState(false);
+    const [isReging, setIsReging] = useState(false)
 
     const onClickReturnLogin = () => {
         pageTypeSet(PageType.Login)
@@ -44,7 +46,7 @@ export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: Pag
                     .then(
                         (result) => {
                             if (result.success) {
-                                showInfoMessage("", "注册成功", 5000)
+                                showInfoMessage("", t("registerSuccess"), 5000)
                                 pageTypeSet(PageType.Login)
                             }
                             else {
@@ -53,10 +55,10 @@ export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: Pag
                                         return onClickRegister(values, "v2")
                                     }
                                 }
-                                showErrorMessage(result.message, "注册失败")
+                                showErrorMessage(result.message, t("registerFailed"))
                             }
                         })
-                    .catch((e) => showErrorMessage(e.toString(), "错误"))
+                    .catch((e) => showErrorMessage(e.toString(), t("error")))
                     .finally(() => setIsReging(false))
             })
             .catch((e) => {
@@ -67,36 +69,36 @@ export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: Pag
 
     return (
         <Box maw={340} mx="auto" style={marginTopBottom}>
-            <Text fw={700} size="xl">注册</Text>
+            <Text fw={700} size="xl">{t("register")}</Text>
             <form onSubmit={form.onSubmit((values) =>onClickRegister(values))}>
                 <TextInput
                     withAsterisk
-                    label="用户名"
-                    placeholder="用于登录的用户名"
+                    label={t("userName")}
+                    placeholder={t("userNameForLogin")}
                     {...form.getInputProps('userName')}
                 />
                 <PasswordInput
                     withAsterisk
-                    label="密码"
-                    placeholder="密码"
+                    label={t("pwd")}
+                    placeholder={t("pwd")}
                     {...form.getInputProps('password')}
                 />
                 <PasswordInput
                     withAsterisk
-                    label="确认密码"
-                    placeholder="再次输入密码"
+                    label={t("confirmPwd")}
+                    placeholder={t("enterPwdAgain")}
                     {...form.getInputProps('password2')}
                 />
                 <TextInput
                     withAsterisk
-                    label="邮箱"
-                    placeholder="可用于找回账号"
+                    label={t("email")}
+                    placeholder={t("canRetrieveAccount")}
                     {...form.getInputProps('email')}
                 />
 
                 <Group justify="flex-end" mt="md">
-                    <Button onClick={onClickReturnLogin}>返回登录</Button>
-                    <Button type="submit" disabled={isReging}>注册</Button>
+                    <Button onClick={onClickReturnLogin}>{t("returnLogin")}</Button>
+                    <Button type="submit" disabled={isReging}>{t("register")}</Button>
                 </Group>
             </form>
         </Box>

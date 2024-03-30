@@ -32,16 +32,10 @@ import {confirmEditGrade} from "../components/subs/confirms.tsx";
 import {getDefaultGrade, songDifficultyColor} from "../utils/presets.ts";
 import {useIntersection} from "@mantine/hooks";
 import {SongFilter} from "../components/SongFilter.tsx";
+import {useTranslation} from "react-i18next";
 
 const LazyLoadCount = 15
 
-const sortKeys = [
-    { name: 'Rating', key: 'rating' },
-    { name: '曲名', key: 'songName' },
-    { name: '定数', key: 'songRating' },
-    { name: '分数', key: 'score' },
-    { name: '游玩时间', key: 'time_played' },
-]
 
 export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType: PageType) => void, slst: SlstItem[]}) {
     const [records, setRecords] = useState<UserRecordsData | null>(null)
@@ -59,6 +53,7 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
 
     const [width, setWidth] = useState(window.innerWidth)
     // const [height, setHeight] = useState(window.innerHeight)
+    const {t} = useTranslation()
 
     const updateLoadedRows = () => {
         setLoadedRows(v => Math.min(v + LazyLoadCount, songDisplayData?.length || v + LazyLoadCount))
@@ -75,7 +70,7 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
             .then((result) => {
                 if (result.success && result.data) {
                     if (!result.data.me) {
-                        showWarningMessage("未找到个人数据。请先同步数成绩", "数据不全")
+                        showWarningMessage(t("dataNotFound"), t("dataNotFoundTitle"))
                         pageTypeSet(PageType.Home)
                         return
                     }
@@ -87,7 +82,7 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
                 }
             })
             .catch((e) => {
-                showErrorMessage(e.toString(), "获取绑定信息失败")
+                showErrorMessage(e.toString(), t("getBindInfoFailed"))
                 pageTypeSet(PageType.Login)
             })
     }
@@ -275,11 +270,11 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
                     refreshRecords()
                 }
                 else {
-                    showWarningMessage("您还未绑定 Arcaea 账号", "未绑定账号")
+                    showWarningMessage(t("arcaeaNotBind"), t("accountNotBind"))
                     pageTypeSet(PageType.AccountBind)
                 }
             })
-            .catch((e) => showErrorMessage(e.toString(), "获取绑定数据失败"))
+            .catch((e) => showErrorMessage(e.toString(), t("getBindFailed")))
 
         return () => {
             window.removeEventListener('resize', handleResize);
@@ -294,10 +289,10 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
         apiUpdateModifiedB30(newEditedList)
             .then((result) => {
                 if (!result.success) {
-                    showErrorMessage(result.message, "更新成绩失败")
+                    showErrorMessage(result.message, t("updateGradeFailed"))
                 }
             })
-            .catch((e) => showErrorMessage(e.toString(), "更新成绩出错"))
+            .catch((e) => showErrorMessage(e.toString(), t("updateGradeErr")))
             .finally(() => {
                 refreshRecords()
             })
@@ -317,12 +312,20 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
                 newEditedList = [...newEditedList.slice(0, editPos), ...newEditedList.slice(editPos + 1)]
             }
             else {
-                showWarningMessage("未找到删除目标", "删除位置异常")
+                showWarningMessage(t("deleteTargetNotFound"), t("deleteTargetIndexError"))
                 return
             }
         }
         onSubmitEditB30(newEditedList)
     }
+
+    const sortKeys = [
+        { name: "Rating", key: 'rating' },
+        { name: t("songName"), key: 'songName' },
+        { name: t("songRating"), key: 'songRating' },
+        { name: t("score"), key: 'score' },
+        { name: t("timePlayed"), key: 'time_played' },
+    ]
 
     const rows = songDisplayData?.slice(0, loadedRows)?.map((song) => (
         <Table.Tr key={songInfoToId(song)}>
@@ -343,7 +346,7 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
                     <ActionIcon onClick={() => confirmEditGrade(slst, records!.me!, song, records?.modified_b30, onSubmitEditB30)}>
                         <Icon path={mdiPencil} style={iconMStyle}/>
                     </ActionIcon>
-                    <Tooltip label={song.isModified ? "删除" : "归零"}>
+                    <Tooltip label={t(song.isModified ? "delete" : "zeroing")}>
                         <ActionIcon color="red" onClick={() => onClickDeleteB30Item(song, records?.modified_b30)}>
                             <Icon path={song.isModified ? mdiDelete : mdiCloseCircleOutline} style={iconMStyle}/>
                         </ActionIcon>
@@ -367,14 +370,14 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
                         onClick={() => confirmEditGrade(slst, records!.me!, undefined, records?.modified_b30, onSubmitEditB30)}
                         leftSection={
                             <Icon path={mdiPlus} style={iconMStyle}></Icon>
-                        }>增加成绩</Button>
+                        }>{t("addGrade")}</Button>
                 </Group>
             </Group>
 
             <Card padding="lg" radius="md" withBorder style={marginTopBottom}>
                 <Card.Section p="md">
                     <Text fz="lg" fw={700}>
-                        排序方式
+                        {t("sortOrder")}
                     </Text>
                     <Group style={{marginTop: "1em"}}>
                         {(sortKeys).map((item) => (
@@ -394,7 +397,7 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
                 <Card.Section>
                     <Accordion variant="filled" chevronPosition="left">
                         <Accordion.Item value="advanced-filter">
-                            <Accordion.Control>筛选设置</Accordion.Control>
+                            <Accordion.Control>{t("filterSettings")}</Accordion.Control>
                             <Accordion.Panel>
                                 <SongFilter onChange={updateFilter}/>
                             </Accordion.Panel>
@@ -406,11 +409,11 @@ export default function RecordsPage({pageTypeSet, slst}: {pageTypeSet: (pageType
             <Table miw={100}>
                 <Table.Thead>
                     <Table.Tr>
-                        <Table.Th>曲目</Table.Th>
-                        <Table.Th>判定</Table.Th>
-                        <Table.Th>分数</Table.Th>
+                        <Table.Th>{t("song")}</Table.Th>
+                        <Table.Th>{t("songGInfo")}</Table.Th>
+                        <Table.Th>{t("score")}</Table.Th>
                         <Table.Th>Rating</Table.Th>
-                        <Table.Th>操作</Table.Th>
+                        <Table.Th>{t("action")}</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>{rows}</Table.Tbody>
